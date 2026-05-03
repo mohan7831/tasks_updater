@@ -1,0 +1,673 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8" />
+<meta name="viewport" content="width=device-width, initial-scale=1.0" />
+<title>100-Day Consistency Tracker</title>
+<link href="https://fonts.googleapis.com/css2?family=DM+Mono:wght@400;500&family=Syne:wght@400;600;700;800&family=DM+Sans:wght@300;400;500&display=swap" rel="stylesheet" />
+<style>
+  *,*::before,*::after{box-sizing:border-box;margin:0;padding:0}
+  :root{
+    --bg:#0a0a0f;--surface:#111118;--surface2:#1a1a24;--surface3:#22222f;
+    --border:#2a2a3a;--border2:#3a3a50;
+    --text:#f0f0f8;--text2:#9090b0;--text3:#60607a;
+    --green:#22c55e;--green-dim:#15803d;--green-bg:#0d2318;
+    --red:#ef4444;--red-bg:#2b0e0e;
+    --amber:#f59e0b;--amber-bg:#2b1f08;
+    --blue:#6366f1;--blue-bg:#1a1b3a;
+    --accent:#7c3aed;--accent2:#a855f7;
+    --radius:10px;--radius-lg:16px;
+  }
+  .light{
+    --bg:#f8f7ff;--surface:#ffffff;--surface2:#f0effe;--surface3:#e8e6fa;
+    --border:#d8d6ee;--border2:#c0bde0;
+    --text:#1a1830;--text2:#5050780;--text3:#8080a0;
+    --green:#16a34a;--green-dim:#dcfce7;--green-bg:#f0fdf4;
+    --red:#dc2626;--red-bg:#fef2f2;
+    --amber:#d97706;--amber-bg:#fffbeb;
+    --blue:#4f46e5;--blue-bg:#eef2ff;
+    --accent:#7c3aed;--accent2:#9333ea;
+    --border:#dedcf0;--border2:#c8c6e8;
+    --text2:#606088;--text3:#a0a0c0;
+  }
+  html{font-size:15px}
+  body{
+    font-family:'DM Sans',sans-serif;
+    background:var(--bg);color:var(--text);
+    min-height:100vh;line-height:1.5;
+  }
+  .app{display:flex;flex-direction:column;min-height:100vh}
+  header{
+    padding:1rem 1.5rem;border-bottom:1px solid var(--border);
+    display:flex;align-items:center;justify-content:space-between;
+    background:var(--surface);position:sticky;top:0;z-index:100;
+  }
+  .logo{font-family:'Syne',sans-serif;font-weight:800;font-size:1.1rem;
+    background:linear-gradient(135deg,var(--accent2),#60a5fa);
+    -webkit-background-clip:text;-webkit-text-fill-color:transparent;background-clip:text;
+    letter-spacing:-0.02em;
+  }
+  .header-actions{display:flex;gap:8px;align-items:center}
+  .btn{
+    padding:6px 14px;border-radius:8px;border:1px solid var(--border2);
+    background:var(--surface2);color:var(--text);font-size:13px;
+    cursor:pointer;font-family:'DM Sans',sans-serif;font-weight:500;
+    transition:all 0.15s;
+  }
+  .btn:hover{background:var(--surface3);border-color:var(--accent)}
+  .btn-accent{background:var(--accent);border-color:var(--accent);color:#fff}
+  .btn-accent:hover{background:var(--accent2);border-color:var(--accent2)}
+  .btn-sm{padding:4px 10px;font-size:12px}
+  .btn-danger{border-color:#ef444455;color:var(--red)}
+  .btn-danger:hover{background:var(--red-bg)}
+  nav{
+    display:flex;gap:4px;padding:0.75rem 1.5rem;
+    border-bottom:1px solid var(--border);background:var(--surface);
+    overflow-x:auto;
+  }
+  .nav-tab{
+    padding:6px 16px;border-radius:8px;border:1px solid transparent;
+    background:none;color:var(--text2);font-size:13px;font-weight:500;
+    cursor:pointer;font-family:'DM Sans',sans-serif;white-space:nowrap;
+    transition:all 0.15s;
+  }
+  .nav-tab.active{background:var(--surface2);border-color:var(--border2);color:var(--text)}
+  .nav-tab:hover:not(.active){color:var(--text);background:var(--surface2)}
+  main{flex:1;padding:1.5rem;max-width:1400px;width:100%;margin:0 auto}
+  .stats-row{display:grid;grid-template-columns:repeat(auto-fit,minmax(140px,1fr));gap:12px;margin-bottom:1.5rem}
+  .stat-card{
+    background:var(--surface);border:1px solid var(--border);border-radius:var(--radius-lg);
+    padding:1rem 1.25rem;
+  }
+  .stat-label{font-size:11px;font-weight:500;color:var(--text3);text-transform:uppercase;letter-spacing:0.06em;margin-bottom:6px}
+  .stat-value{font-family:'Syne',sans-serif;font-size:1.6rem;font-weight:700;line-height:1}
+  .stat-sub{font-size:11px;color:var(--text3);margin-top:4px}
+  .stat-green .stat-value{color:var(--green)}
+  .stat-blue .stat-value{color:#60a5fa}
+  .stat-amber .stat-value{color:var(--amber)}
+  .stat-purple .stat-value{color:var(--accent2)}
+  .progress-bar{height:4px;background:var(--surface3);border-radius:4px;margin-top:8px;overflow:hidden}
+  .progress-fill{height:100%;border-radius:4px;transition:width 0.4s ease;
+    background:linear-gradient(90deg,var(--accent),var(--accent2))}
+  .section-header{
+    display:flex;align-items:center;justify-content:space-between;
+    margin-bottom:1rem;
+  }
+  .section-title{font-family:'Syne',sans-serif;font-size:1rem;font-weight:700;letter-spacing:-0.01em}
+  .grid-wrap{overflow-x:auto;border-radius:var(--radius-lg);border:1px solid var(--border);background:var(--surface)}
+  table{width:100%;border-collapse:collapse;min-width:500px}
+  thead th{
+    padding:10px 12px;font-size:11px;font-weight:500;color:var(--text3);
+    text-transform:uppercase;letter-spacing:0.05em;border-bottom:1px solid var(--border);
+    background:var(--surface2);white-space:nowrap;text-align:center;
+  }
+  thead th:first-child{text-align:left;min-width:80px}
+  tbody tr{border-bottom:1px solid var(--border)}
+  tbody tr:last-child{border-bottom:none}
+  tbody tr:hover{background:var(--surface2)}
+  .day-cell{
+    padding:8px 12px;font-size:12px;font-weight:500;color:var(--text2);
+    white-space:nowrap;
+  }
+  .day-badge{
+    display:inline-flex;align-items:center;gap:5px;
+    padding:3px 8px;border-radius:6px;font-size:11px;font-weight:600;
+  }
+  .day-success{background:var(--green-bg);color:var(--green)}
+  .day-partial{background:var(--amber-bg);color:var(--amber)}
+  .day-failed{background:var(--red-bg);color:var(--red)}
+  .day-future{background:var(--surface2);color:var(--text3)}
+  td.task-cell{text-align:center;padding:6px 8px}
+  .check-btn{
+    width:28px;height:28px;border-radius:6px;border:1.5px solid var(--border2);
+    background:none;cursor:pointer;display:inline-flex;align-items:center;justify-content:center;
+    font-size:14px;transition:all 0.12s;color:var(--text3);
+  }
+  .check-btn.done{background:var(--green-bg);border-color:var(--green);color:var(--green)}
+  .check-btn.missed{background:var(--red-bg);border-color:var(--red);color:var(--red)}
+  .check-btn:disabled{opacity:0.3;cursor:not-allowed}
+  .score-cell{padding:6px 12px;text-align:right;font-size:12px;color:var(--text3);white-space:nowrap}
+  .task-header-cell{
+    display:flex;align-items:center;gap:6px;justify-content:center;padding:10px 8px;
+  }
+  .task-name-input{
+    background:none;border:none;color:var(--text2);font-size:11px;font-weight:500;
+    text-transform:uppercase;letter-spacing:0.05em;cursor:pointer;
+    font-family:'DM Sans',sans-serif;text-align:center;max-width:90px;
+    outline:none;
+  }
+  .task-name-input:focus{color:var(--text);border-bottom:1px solid var(--accent)}
+  .del-task{
+    width:16px;height:16px;border-radius:4px;border:none;background:none;
+    color:var(--text3);cursor:pointer;font-size:14px;line-height:1;padding:0;
+    display:flex;align-items:center;justify-content:center;opacity:0;transition:opacity 0.15s;
+  }
+  th:hover .del-task{opacity:1}
+  .heatmap-grid{
+    display:flex;flex-wrap:wrap;gap:3px;
+  }
+  .heat-cell{
+    width:18px;height:18px;border-radius:3px;cursor:pointer;
+    transition:transform 0.1s;position:relative;
+  }
+  .heat-cell:hover{transform:scale(1.3);z-index:10}
+  .heat-0{background:var(--surface2)}
+  .heat-1{background:#1a3a25}
+  .heat-2{background:#1f6635}
+  .heat-3{background:#22a84a}
+  .heat-4{background:var(--green)}
+  .heat-missed{background:#4a1515}
+  .heat-future{background:var(--surface3);opacity:0.4}
+  .light .heat-1{background:#bbf7d0}
+  .light .heat-2{background:#86efac}
+  .light .heat-3{background:#4ade80}
+  .light .heat-4{background:#16a34a}
+  .light .heat-missed{background:#fecaca}
+  .tooltip{
+    position:fixed;z-index:999;background:var(--surface);border:1px solid var(--border2);
+    border-radius:8px;padding:6px 10px;font-size:12px;pointer-events:none;
+    display:none;box-shadow:0 4px 16px #0006;
+  }
+  .modal-backdrop{
+    position:fixed;inset:0;background:#0009;z-index:200;
+    display:flex;align-items:center;justify-content:center;padding:1rem;
+  }
+  .modal{
+    background:var(--surface);border:1px solid var(--border2);border-radius:var(--radius-lg);
+    padding:1.5rem;max-width:420px;width:100%;
+  }
+  .modal h3{font-family:'Syne',sans-serif;font-weight:700;margin-bottom:1rem}
+  .field{margin-bottom:1rem}
+  .field label{display:block;font-size:12px;font-weight:500;color:var(--text2);margin-bottom:6px}
+  .field input,.field select{
+    width:100%;padding:8px 12px;background:var(--surface2);border:1px solid var(--border2);
+    border-radius:8px;color:var(--text);font-size:14px;font-family:'DM Sans',sans-serif;
+    outline:none;transition:border-color 0.15s;
+  }
+  .field input:focus,.field select:focus{border-color:var(--accent)}
+  .field-row{display:flex;gap:8px}
+  .modal-actions{display:flex;gap:8px;justify-content:flex-end;margin-top:1rem}
+  .streak-flame{font-size:1.1rem;vertical-align:middle}
+  .empty-state{
+    text-align:center;padding:3rem;color:var(--text3);
+  }
+  .empty-state h3{font-family:'Syne',sans-serif;font-size:1.1rem;margin-bottom:0.5rem;color:var(--text2)}
+  .chip{
+    display:inline-flex;align-items:center;gap:4px;
+    padding:3px 8px;border-radius:6px;font-size:11px;font-weight:500;
+  }
+  .chip-green{background:var(--green-bg);color:var(--green)}
+  .chip-red{background:var(--red-bg);color:var(--red)}
+  .chip-amber{background:var(--amber-bg);color:var(--amber)}
+  .chip-blue{background:var(--blue-bg);color:#60a5fa}
+  .settings-section{
+    background:var(--surface);border:1px solid var(--border);border-radius:var(--radius-lg);
+    padding:1.25rem;margin-bottom:1rem;
+  }
+  .settings-section h3{font-family:'Syne',sans-serif;font-weight:700;font-size:0.95rem;margin-bottom:1rem;color:var(--text2)}
+  .task-list-item{
+    display:flex;align-items:center;justify-content:space-between;
+    padding:8px 0;border-bottom:1px solid var(--border);
+  }
+  .task-list-item:last-child{border-bottom:none}
+  .mono{font-family:'DM Mono',monospace;font-size:12px}
+  .add-row{padding:0.75rem 1.5rem;border-top:1px solid var(--border)}
+  .export-btn{display:flex;align-items:center;gap:6px}
+  @media(max-width:600px){
+    main{padding:1rem}
+    .stats-row{grid-template-columns:repeat(2,1fr)}
+    header{padding:0.75rem 1rem}
+    nav{padding:0.5rem 1rem}
+  }
+  .fade-in{animation:fadeIn 0.2s ease}
+  @keyframes fadeIn{from{opacity:0;transform:translateY(4px)}to{opacity:1;transform:translateY(0)}}
+  .scroll-x{overflow-x:auto}
+</style>
+</head>
+<body>
+<div id="root"></div>
+<div class="tooltip" id="tooltip"></div>
+
+<script src="https://cdnjs.cloudflare.com/ajax/libs/react/18.2.0/umd/react.production.min.js"></script>
+<script src="https://cdnjs.cloudflare.com/ajax/libs/react-dom/18.2.0/umd/react-dom.production.min.js"></script>
+<script>
+const {useState,useEffect,useCallback,useRef,useMemo}=React;
+
+const DEFAULT_TASKS=[
+  {id:'t1',name:'Wake 6AM'},
+  {id:'t2',name:'Exercise'},
+  {id:'t3',name:'Study'},
+  {id:'t4',name:'Read'},
+  {id:'t5',name:'No Junk'},
+];
+
+const DEFAULT_STATE={
+  tasks:DEFAULT_TASKS,
+  totalDays:100,
+  startDate:new Date().toISOString().split('T')[0],
+  checks:{},
+  darkMode:true,
+};
+
+function loadState(){
+  try{
+    const s=localStorage.getItem('consistency_tracker_v2');
+    if(s)return{...DEFAULT_STATE,...JSON.parse(s)};
+  }catch(e){}
+  return DEFAULT_STATE;
+}
+
+function saveState(s){
+  try{localStorage.setItem('consistency_tracker_v2',JSON.stringify(s));}catch(e){}
+}
+
+function dayStatus(tasks,checks,dayIdx){
+  if(!tasks.length)return'future';
+  const total=tasks.length;
+  const done=tasks.filter(t=>checks[`${dayIdx}_${t.id}`]==='done').length;
+  const missed=tasks.filter(t=>checks[`${dayIdx}_${t.id}`]==='missed').length;
+  if(done===0&&missed===0)return'future';
+  if(done===total)return'success';
+  if(done===0)return'failed';
+  return'partial';
+}
+
+function isPastDay(startDate,dayIdx){
+  const start=new Date(startDate);start.setHours(0,0,0,0);
+  const day=new Date(start);day.setDate(day.getDate()+dayIdx);
+  const now=new Date();now.setHours(0,0,0,0);
+  return day<=now;
+}
+
+function isToday(startDate,dayIdx){
+  const start=new Date(startDate);start.setHours(0,0,0,0);
+  const day=new Date(start);day.setDate(day.getDate()+dayIdx);
+  const now=new Date();now.setHours(0,0,0,0);
+  return day.getTime()===now.getTime();
+}
+
+function formatDate(startDate,dayIdx){
+  const d=new Date(startDate);d.setDate(d.getDate()+dayIdx);
+  return d.toLocaleDateString('en',{month:'short',day:'numeric'});
+}
+
+function uid(){return Math.random().toString(36).slice(2,8)}
+
+function App(){
+  const [state,setState]=useState(loadState);
+  const [tab,setTab]=useState('tracker');
+  const [showModal,setShowModal]=useState(false);
+  const [editTask,setEditTask]=useState(null);
+  const {tasks,totalDays,startDate,checks,darkMode}=state;
+
+  useEffect(()=>{
+    saveState(state);
+    document.body.className=darkMode?'':'light';
+  },[state]);
+
+  const update=useCallback(patch=>setState(s=>({...s,...patch})),[]);
+
+  const toggleCheck=useCallback((dayIdx,taskId)=>{
+    const key=`${dayIdx}_${taskId}`;
+    const cur=checks[key];
+    let next;
+    if(!cur)next='done';
+    else if(cur==='done')next='missed';
+    else next=undefined;
+    setState(s=>{
+      const nc={...s.checks};
+      if(next===undefined)delete nc[key];
+      else nc[key]=next;
+      return{...s,checks:nc};
+    });
+  },[checks]);
+
+  const addTask=useCallback(()=>{
+    const t={id:uid(),name:'New Task'};
+    update({tasks:[...tasks,t]});
+  },[tasks,update]);
+
+  const deleteTask=useCallback(id=>{
+    update({tasks:tasks.filter(t=>t.id!==id)});
+    setState(s=>{
+      const nc={...s.checks};
+      Object.keys(nc).forEach(k=>{if(k.endsWith('_'+id))delete nc[k];});
+      return{...s,checks:nc};
+    });
+  },[tasks,update]);
+
+  const renameTask=useCallback((id,name)=>{
+    update({tasks:tasks.map(t=>t.id===id?{...t,name}:t)});
+  },[tasks,update]);
+
+  const stats=useMemo(()=>{
+    let totalCompleted=0,totalMissed=0,totalPossible=0;
+    let successDays=0,partialDays=0,failedDays=0;
+    let streak=0,maxStreak=0,curStreak=0;
+    const pastDays=[];
+    for(let d=0;d<totalDays;d++){
+      if(isPastDay(startDate,d)){
+        pastDays.push(d);
+        const done=tasks.filter(t=>checks[`${d}_${t.id}`]==='done').length;
+        const miss=tasks.filter(t=>checks[`${d}_${t.id}`]==='missed').length;
+        const touched=done+miss>0;
+        if(touched){
+          totalCompleted+=done;totalMissed+=miss;totalPossible+=tasks.length;
+          const st=dayStatus(tasks,checks,d);
+          if(st==='success'){successDays++;curStreak++;}
+          else{curStreak=0;}
+          if(st==='partial')partialDays++;
+          if(st==='failed')failedDays++;
+          maxStreak=Math.max(maxStreak,curStreak);
+        }
+      }
+    }
+    streak=curStreak;
+    const overallPct=totalPossible>0?Math.round(totalCompleted/totalPossible*100):0;
+    const successRate=pastDays.length>0?Math.round(successDays/pastDays.filter(d=>{
+      const done=tasks.filter(t=>checks[`${d}_${t.id}`]==='done').length;
+      const miss=tasks.filter(t=>checks[`${d}_${t.id}`]==='missed').length;
+      return done+miss>0;
+    }).length*100)||0:0;
+    return{totalCompleted,totalMissed,totalPossible,successDays,partialDays,failedDays,streak,maxStreak,overallPct,successRate,trackedDays:pastDays.length};
+  },[tasks,totalDays,startDate,checks]);
+
+  const exportCSV=useCallback(()=>{
+    const rows=[['Day','Date',...tasks.map(t=>t.name),'Status','Score']];
+    for(let d=0;d<totalDays;d++){
+      if(isPastDay(startDate,d)){
+        const cells=tasks.map(t=>checks[`${d}_${t.id}`]||'');
+        const done=tasks.filter(t=>checks[`${d}_${t.id}`]==='done').length;
+        const st=dayStatus(tasks,checks,d);
+        rows.push([d+1,formatDate(startDate,d),...cells,st,`${done}/${tasks.length}`]);
+      }
+    }
+    const csv=rows.map(r=>r.join(',')).join('\n');
+    const a=document.createElement('a');
+    a.href='data:text/csv;charset=utf-8,'+encodeURIComponent(csv);
+    a.download='consistency-tracker.csv';a.click();
+  },[tasks,totalDays,startDate,checks]);
+
+  return React.createElement('div',{className:'app'},
+    React.createElement('header',null,
+      React.createElement('div',{className:'logo'},'100-Day Tracker'),
+      React.createElement('div',{className:'header-actions'},
+        React.createElement('button',{className:'btn btn-sm',onClick:()=>update({darkMode:!darkMode})},darkMode?'☀ Light':'☾ Dark'),
+        React.createElement('button',{className:'btn btn-sm export-btn',onClick:exportCSV},'↓ CSV'),
+      )
+    ),
+    React.createElement('nav',null,
+      ['tracker','heatmap','settings'].map(t=>
+        React.createElement('button',{key:t,className:`nav-tab${tab===t?' active':''}`,onClick:()=>setTab(t)},
+          t==='tracker'?'📋 Tracker':t==='heatmap'?'🔥 Heatmap':'⚙ Settings'
+        )
+      )
+    ),
+    React.createElement('main',null,
+      React.createElement(StatsRow,{stats,tasks,totalDays}),
+      tab==='tracker'&&React.createElement(TrackerView,{tasks,totalDays,startDate,checks,toggleCheck,addTask,deleteTask,renameTask}),
+      tab==='heatmap'&&React.createElement(HeatmapView,{tasks,totalDays,startDate,checks}),
+      tab==='settings'&&React.createElement(SettingsView,{state,update,tasks,addTask,deleteTask,renameTask}),
+    )
+  );
+}
+
+function StatsRow({stats,tasks,totalDays}){
+  return React.createElement('div',{className:'stats-row'},
+    React.createElement('div',{className:'stat-card stat-purple'},
+      React.createElement('div',{className:'stat-label'},'Overall'),
+      React.createElement('div',{className:'stat-value'},stats.overallPct+'%'),
+      React.createElement('div',{className:'progress-bar'},
+        React.createElement('div',{className:'progress-fill',style:{width:stats.overallPct+'%'}})
+      ),
+      React.createElement('div',{className:'stat-sub'},stats.totalCompleted+' tasks done')
+    ),
+    React.createElement('div',{className:'stat-card stat-green'},
+      React.createElement('div',{className:'stat-label'},'🔥 Streak'),
+      React.createElement('div',{className:'stat-value'},stats.streak),
+      React.createElement('div',{className:'stat-sub'},'Best: '+stats.maxStreak+' days')
+    ),
+    React.createElement('div',{className:'stat-card stat-blue'},
+      React.createElement('div',{className:'stat-label'},'Success Days'),
+      React.createElement('div',{className:'stat-value'},stats.successDays),
+      React.createElement('div',{className:'stat-sub'},stats.trackedDays+' days tracked')
+    ),
+    React.createElement('div',{className:'stat-card stat-amber'},
+      React.createElement('div',{className:'stat-label'},'Missed Tasks'),
+      React.createElement('div',{className:'stat-value'},stats.totalMissed),
+      React.createElement('div',{className:'stat-sub'},stats.failedDays+' failed days')
+    ),
+  );
+}
+
+function TrackerView({tasks,totalDays,startDate,checks,toggleCheck,addTask,deleteTask,renameTask}){
+  const days=Array.from({length:totalDays},(_,i)=>i);
+  const today=new Date();today.setHours(0,0,0,0);
+  const todayRef=useRef(null);
+  useEffect(()=>{
+    if(todayRef.current)todayRef.current.scrollIntoView({block:'nearest',behavior:'smooth'});
+  },[]);
+
+  if(tasks.length===0){
+    return React.createElement('div',{className:'empty-state'},
+      React.createElement('h3',null,'No tasks yet'),
+      React.createElement('p',null,'Add tasks in Settings to start tracking.'),
+    );
+  }
+
+  return React.createElement('div',{className:'fade-in'},
+    React.createElement('div',{className:'section-header'},
+      React.createElement('span',{className:'section-title'},'Daily Grid'),
+      React.createElement('div',{style:{display:'flex',gap:'8px',flexWrap:'wrap'}},
+        React.createElement('span',{className:'chip chip-green'},'✓ Done'),
+        React.createElement('span',{className:'chip chip-red'},'✗ Missed'),
+        React.createElement('span',{className:'chip chip-amber'},'◑ Partial'),
+      )
+    ),
+    React.createElement('div',{className:'grid-wrap scroll-x'},
+      React.createElement('table',null,
+        React.createElement('thead',null,
+          React.createElement('tr',null,
+            React.createElement('th',{style:{textAlign:'left'}},'Day'),
+            ...tasks.map(t=>
+              React.createElement('th',{key:t.id},
+                React.createElement('div',{className:'task-header-cell'},
+                  React.createElement('input',{
+                    className:'task-name-input',value:t.name,
+                    onChange:e=>renameTask(t.id,e.target.value),
+                    title:'Click to rename'
+                  }),
+                  React.createElement('button',{
+                    className:'del-task',title:'Delete task',
+                    onClick:()=>confirm('Delete "'+t.name+'"?')&&deleteTask(t.id)
+                  },'×')
+                )
+              )
+            ),
+            React.createElement('th',{style:{textAlign:'right'}},'Score'),
+          )
+        ),
+        React.createElement('tbody',null,
+          days.map(d=>{
+            const past=isPastDay(startDate,d);
+            const tod=isToday(startDate,d);
+            const done=tasks.filter(t=>checks[`${d}_${t.id}`]==='done').length;
+            const status=dayStatus(tasks,checks,d);
+            return React.createElement('tr',{key:d,ref:tod?todayRef:null,
+              style:tod?{outline:'2px solid var(--accent)',outlineOffset:'-1px'}:null},
+              React.createElement('td',{className:'day-cell'},
+                React.createElement('span',{className:`day-badge day-${status}`},
+                  tod?'▶ Today':status==='success'?'✓':status==='failed'?'✗':status==='partial'?'◑':'',
+                  ' D'+(d+1)
+                ),
+                React.createElement('div',{style:{fontSize:'10px',color:'var(--text3)',marginTop:'2px'}},
+                  formatDate(startDate,d)
+                )
+              ),
+              ...tasks.map(t=>{
+                const key=`${d}_${t.id}`;
+                const val=checks[key];
+                return React.createElement('td',{key:t.id,className:'task-cell'},
+                  React.createElement('button',{
+                    className:`check-btn${val==='done'?' done':val==='missed'?' missed':''}`,
+                    onClick:()=>past&&toggleCheck(d,t.id),
+                    disabled:!past,
+                    title:past?(val==='done'?'Done (click→missed)':val==='missed'?'Missed (click→clear)':'Mark done'):'Future day'
+                  },
+                    val==='done'?'✓':val==='missed'?'✗':'·'
+                  )
+                );
+              }),
+              React.createElement('td',{className:'score-cell'},
+                past?React.createElement('span',{className:`chip ${done===tasks.length?'chip-green':done===0?'chip-red':'chip-amber'}`},
+                  done+'/'+tasks.length
+                ):React.createElement('span',{style:{color:'var(--text3)',fontSize:'11px'}},'—')
+              )
+            );
+          })
+        )
+      )
+    ),
+    React.createElement('div',{className:'add-row'},
+      React.createElement('button',{className:'btn btn-accent',onClick:addTask},'+ Add Task')
+    )
+  );
+}
+
+function HeatmapView({tasks,totalDays,startDate,checks}){
+  const tooltip=document.getElementById('tooltip');
+  const handleHover=(e,d)=>{
+    const date=formatDate(startDate,d);
+    const done=tasks.filter(t=>checks[`${d}_${t.id}`]==='done').length;
+    const st=dayStatus(tasks,checks,d);
+    tooltip.style.display='block';
+    tooltip.style.left=(e.clientX+12)+'px';
+    tooltip.style.top=(e.clientY-30)+'px';
+    tooltip.innerHTML=`<b>Day ${d+1}</b> · ${date}<br>${done}/${tasks.length} tasks · ${st}`;
+  };
+  const handleLeave=()=>{tooltip.style.display='none'};
+
+  const cells=Array.from({length:totalDays},(_,d)=>{
+    const past=isPastDay(startDate,d);
+    const tod=isToday(startDate,d);
+    const st=dayStatus(tasks,checks,d);
+    let cls='heat-future';
+    if(past||tod){
+      const done=tasks.filter(t=>checks[`${d}_${t.id}`]==='done').length;
+      const ratio=tasks.length?done/tasks.length:0;
+      if(st==='future'||(!past&&!tod))cls='heat-future';
+      else if(done===0&&tasks.filter(t=>checks[`${d}_${t.id}`]==='missed').length>0)cls='heat-missed';
+      else if(ratio===0)cls='heat-future';
+      else if(ratio<0.4)cls='heat-1';
+      else if(ratio<0.7)cls='heat-2';
+      else if(ratio<1)cls='heat-3';
+      else cls='heat-4';
+    }
+    return React.createElement('div',{
+      key:d,className:`heat-cell ${cls}`,
+      title:`Day ${d+1}`,
+      onMouseMove:e=>handleHover(e,d),
+      onMouseLeave:handleLeave,
+      style:{outline:tod?'2px solid var(--accent)':'none',outlineOffset:'1px'}
+    });
+  });
+
+  return React.createElement('div',{className:'fade-in'},
+    React.createElement('div',{className:'section-header'},
+      React.createElement('span',{className:'section-title'},'Contribution Heatmap'),
+    ),
+    React.createElement('div',{style:{background:'var(--surface)',border:'1px solid var(--border)',borderRadius:'var(--radius-lg)',padding:'1.5rem'}},
+      React.createElement('div',{className:'heatmap-grid'},cells),
+      React.createElement('div',{style:{display:'flex',gap:'8px',alignItems:'center',marginTop:'1rem',fontSize:'12px',color:'var(--text3)'}},
+        'Less ',
+        React.createElement('div',{className:'heat-cell heat-0',style:{width:14,height:14}}),
+        React.createElement('div',{className:'heat-cell heat-1',style:{width:14,height:14}}),
+        React.createElement('div',{className:'heat-cell heat-2',style:{width:14,height:14}}),
+        React.createElement('div',{className:'heat-cell heat-3',style:{width:14,height:14}}),
+        React.createElement('div',{className:'heat-cell heat-4',style:{width:14,height:14}}),
+        ' More',
+        React.createElement('div',{className:'heat-cell heat-missed',style:{width:14,height:14,marginLeft:12}}),
+        ' Missed',
+      )
+    ),
+    React.createElement('div',{style:{marginTop:'1.5rem'}},
+      React.createElement('div',{className:'section-title',style:{marginBottom:'1rem'}},'Daily Breakdown'),
+      React.createElement('div',{style:{display:'flex',flexDirection:'column',gap:'4px'}},
+        Array.from({length:Math.min(totalDays,100)},(_,d)=>{
+          if(!isPastDay(startDate,d))return null;
+          const done=tasks.filter(t=>checks[`${d}_${t.id}`]==='done').length;
+          const st=dayStatus(tasks,checks,d);
+          const pct=tasks.length?Math.round(done/tasks.length*100):0;
+          if(done+tasks.filter(t=>checks[`${d}_${t.id}`]==='missed').length===0)return null;
+          return React.createElement('div',{key:d,style:{display:'flex',alignItems:'center',gap:'8px',fontSize:'12px'}},
+            React.createElement('span',{style:{color:'var(--text3)',minWidth:'40px'},'className':'mono'},'D'+(d+1)),
+            React.createElement('div',{style:{flex:1,height:'6px',background:'var(--surface2)',borderRadius:'4px',overflow:'hidden'}},
+              React.createElement('div',{style:{
+                width:pct+'%',height:'100%',borderRadius:'4px',
+                background:st==='success'?'var(--green)':st==='partial'?'var(--amber)':'var(--red)',
+                transition:'width 0.4s'
+              }})
+            ),
+            React.createElement('span',{style:{color:'var(--text2)',minWidth:'32px',textAlign:'right'}},pct+'%'),
+          );
+        })
+      )
+    )
+  );
+}
+
+function SettingsView({state,update,tasks,addTask,deleteTask,renameTask}){
+  const {totalDays,startDate}=state;
+  return React.createElement('div',{className:'fade-in'},
+    React.createElement('div',{className:'settings-section'},
+      React.createElement('h3',null,'Challenge Setup'),
+      React.createElement('div',{className:'field-row'},
+        React.createElement('div',{className:'field',style:{flex:1}},
+          React.createElement('label',null,'Total Days'),
+          React.createElement('select',{value:totalDays,onChange:e=>update({totalDays:+e.target.value})},
+            [30,60,100,365].map(n=>React.createElement('option',{key:n,value:n},n+' Days'))
+          )
+        ),
+        React.createElement('div',{className:'field',style:{flex:1}},
+          React.createElement('label',null,'Start Date'),
+          React.createElement('input',{type:'date',value:startDate,onChange:e=>update({startDate:e.target.value})})
+        )
+      )
+    ),
+    React.createElement('div',{className:'settings-section'},
+      React.createElement('h3',null,'Tasks ('+tasks.length+')'),
+      tasks.map(t=>
+        React.createElement('div',{key:t.id,className:'task-list-item'},
+          React.createElement('input',{
+            value:t.name,
+            onChange:e=>renameTask(t.id,e.target.value),
+            style:{background:'none',border:'none',color:'var(--text)',fontSize:'14px',fontFamily:'DM Sans,sans-serif',outline:'none',flex:1}
+          }),
+          React.createElement('button',{
+            className:'btn btn-sm btn-danger',
+            onClick:()=>confirm('Delete "'+t.name+'"?')&&deleteTask(t.id)
+          },'Delete')
+        )
+      ),
+      React.createElement('button',{className:'btn btn-accent',style:{marginTop:'1rem'},onClick:addTask},'+ Add Task')
+    ),
+    React.createElement('div',{className:'settings-section'},
+      React.createElement('h3',null,'Data'),
+      React.createElement('div',{style:{display:'flex',gap:'8px',flexWrap:'wrap'}},
+        React.createElement('button',{className:'btn',onClick:()=>{
+          if(confirm('Reset all check data? Tasks and settings will remain.'))
+            update({checks:{}});
+        }},'Clear All Checks'),
+        React.createElement('button',{className:'btn btn-danger',onClick:()=>{
+          if(confirm('Reset EVERYTHING? This cannot be undone.'))
+            localStorage.removeItem('consistency_tracker_v2'),location.reload();
+        }},'Factory Reset'),
+      )
+    )
+  );
+}
+
+ReactDOM.render(React.createElement(App),document.getElementById('root'));
+</script>
+</body>
+</html>
